@@ -6,7 +6,7 @@ from rest_framework import status
 from .models import Actor, Movie, Review
 from .serializers import ActorSerializer, ActorListSerializer, MovieSerializer
 from .serializers import MovieDetailSerializer, ReviewListSerializer
-from .serializers import ReviewDetailSerializer
+from .serializers import ReviewDetailSerializer, MovieTitleSerializer
 # Create your views here.
 
 @api_view(['GET', 'POST'])
@@ -15,14 +15,6 @@ def actor_list(request):
         actors = get_list_or_404(Actor)
         serializer = ActorSerializer(actors, many=True)
         return Response(serializer.data)
-    
-    # elif request.method == 'POST':
-    #     serializer = ArticleListSerializer(data=request.data)
-    #     if serializer.is_valid(raise_exception=True):
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
 @api_view(['GET'])
 def actor_detail(request, actor_pk):
@@ -66,7 +58,6 @@ def review_detail(request, review_pk):
     
     elif request.method == 'DELETE':
         review = Review.objects.get(pk=review_pk)
-        # print('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -76,3 +67,11 @@ def review_detail(request, review_pk):
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return Response(serializer.data)
+        
+@api_view(['POST'])
+def review_create(request, movie_pk):
+    movie = Movie.objects.get(pk=movie_pk)
+    serializer = ReviewDetailSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+            serializer.save(movie=movie)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
